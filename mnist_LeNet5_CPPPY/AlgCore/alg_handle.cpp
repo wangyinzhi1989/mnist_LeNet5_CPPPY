@@ -15,6 +15,7 @@
 #include "TNLog.h"
 #include "alg_handle.h"
 #include "py_thread_state_lock.h"
+#include "sysutils.h"
 
 CAlgHandle::CAlgHandle()
 {
@@ -110,13 +111,35 @@ bool CAlgHandle::TrainModel(TrainModelReq& info)
 
 void CAlgHandle::Discern(DiscernReq& req, DiscernRsp& rsp)
 {
-    // 识别
-    cv::Mat img = cv::imread(req.img_path);
+    // 图片加载
+    std::vector<string> files;
+    std::string pattern = "*";
+    if(!recurse_get_file(files, req.img_path, pattern.c_str()))
+    {
+        LOG_WARN_FMT("get file failed. path[%s]", req.img_path.c_str());
+        return;
+    }
+    int size = files.size();
+    int max_size = engine_.GetMaxBatchSize();
+    if (size > max_size)
+    {
+        LOG_WARN_FMT("batch[%d] max [%d]", size, max_size);
+        return;
+    }
+    LOG_INFO_FMT("batch[%d] max [%d]", size, max_size);
+
     std::vector<cv::Mat> imgs;
-    imgs.emplace_back(img);
-    std::vector<int> label;
-    if (engine_.inference(imgs, label))
-        rsp.number = label[0];
+    int i = 0;
+    for (auto& it : files)
+    {
+        LOG_INFO_FMT("idx[%d] img[%s]", i++, it.c_str());
+        cv::Mat img = cv::imread(it);
+        imgs.emplace_back(img);
+    }
+
+    // 识别
+    if (engine_.Inference(imgs, rsp.label))
+        LOG_INFO("inference success");
     else
         rsp.err_msg = "inference failed.";
 }

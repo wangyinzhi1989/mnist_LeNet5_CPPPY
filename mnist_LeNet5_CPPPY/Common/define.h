@@ -59,7 +59,7 @@ typedef struct _discernReq {
 
 //! 识别应答信息
 typedef struct _discernRsp {
-    int number{ -1 };                                   //!< 识别出的数字结果，-1时表示失败
+    std::vector<int> label;                             //!< 识别出的数字结果，-1时表示失败
     std::string err_msg;                                //!< 错误信息
 }DiscernRsp;
 

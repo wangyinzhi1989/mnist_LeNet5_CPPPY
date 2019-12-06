@@ -48,7 +48,12 @@ public:
     *@param  label 检测结果
     *@return true-成功，false-失败
     */
-    bool inference(std::vector<cv::Mat>& imgs, std::vector<int>& label);
+    bool Inference(std::vector<cv::Mat>& imgs, std::vector<int>& label);
+
+    int GetMaxBatchSize()
+    {
+        return max_batch_size_;
+    }
 
 private:
     /**
@@ -76,7 +81,6 @@ private:
     Dims3 input_dims_{ 1,28,28 };                   //!< 输入的维度
     Dims3 output_dims_{ 10,1,1 };                     //!< 输入的维度
     cv::Size input_size_{ 28,28 };                  //!< 输入的尺寸
-    cv::Mat input_mat_;                             //!< 输入数据
     int in_size_{ 1 };                              //!< 输入单个缓存大小
     int out_size_{ 1 };                             //!< 输出单个缓存大小
 };

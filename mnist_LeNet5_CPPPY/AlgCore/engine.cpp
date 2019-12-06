@@ -154,7 +154,7 @@ bool CEngine::LoadUffAndSave(std::string& uff_model)
         builder->destroy();
         return false;
     }
-    max_batch_size_ = 1;
+    max_batch_size_ = 32;
     // 打开半精度
     //builder->setFp16Mode(true);
     builder->setMaxBatchSize(max_batch_size_);
@@ -227,7 +227,7 @@ inline void readPGMFile(const std::string& fileName, uint8_t* buffer, int inH, i
     infile.read(reinterpret_cast<char*>(buffer), inH * inW);
 }
 
-bool CEngine::inference(std::vector<cv::Mat>& imgs, std::vector<int>& label)
+bool CEngine::Inference(std::vector<cv::Mat>& imgs, std::vector<int>& label)
 {
     if (!engine_)
     {
@@ -239,31 +239,24 @@ bool CEngine::inference(std::vector<cv::Mat>& imgs, std::vector<int>& label)
     IExecutionContext* context = engine_->createExecutionContext();
     int batch_size = imgs.size();
 
-    // 批超过32时，不处理
-    if (batch_size > max_batch_size_)
-    {
-        LOG_WARN_FMT("batch[%d] max [%d]", batch_size, max_batch_size_);
-        return false;
-    }
-
     // 图片整理
     std::vector<cv::Mat> engine_imgs;
     TrimImg(imgs, engine_imgs);
     //input_mat_ = cv::dnn::blobFromImages(engine_imgs, 1.0, input_size_, cv::Scalar(), false);
-    input_mat_ = engine_imgs[0];
 
     int64_t eltCount = 28 * 28;
-    float* inputs = new float[eltCount];
-    /*uint8_t fileData[eltCount];
-    readPGMFile("/home/wangyinzhi/study/data/mnist/test/0.pgm", fileData, 28,28);*/
-    std::cout << "Input:" << std::endl;
-    for (int i = 0; i < eltCount; i++)
+    int64_t input_size = batch_size * eltCount;
+    float* inputs = new float[input_size];
+    memset(inputs, 0, input_size);
+    for(int j = 0; j < batch_size; ++j)
     {
-        //std::cout << (" .:-=+*#%@"[input_mat_.data[i] / 26]) << (((i + 1) % 28) ? "" : "\n");
-        std::cout << (input_mat_.data[i]==0x01 ? " ":"#") << (((i + 1) % 28) ? "" : "\n");
-        inputs[i] = input_mat_.data[i];
+        for (int i = 0; i < eltCount; ++i)
+        {
+            //std::cout << (input_mat_.data[i]==0x01 ? " ":"#") << (((i + 1) % 28) ? "" : "\n");
+            long long idx = j * eltCount + i;
+            inputs[idx] = engine_imgs[j].data[i];
+        }
     }
-    std::cout << std::endl;
 
     // 拷贝图片到显存
     //cudaError res = cudaMemcpy(input_gup_bufs_[0], inputs, batch_size*in_size_ * sizeof(float), cudaMemcpyHostToDevice);

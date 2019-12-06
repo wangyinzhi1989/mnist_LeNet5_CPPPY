@@ -46,19 +46,19 @@ public:
         switch (severity)
         {
         case nvinfer1::ILogger::Severity::kINTERNAL_ERROR:
-            LOG_ERROR(msg);
+            LOG_ERROR_STM(msg);
             break;
         case nvinfer1::ILogger::Severity::kERROR:
-            LOG_ERROR(msg);
+            LOG_ERROR_STM(msg);
             break;
         case nvinfer1::ILogger::Severity::kWARNING:
-            LOG_WARN(msg);
+            LOG_WARN_STM(msg);
             break;
         case nvinfer1::ILogger::Severity::kINFO:
-            LOG_INFO(msg);
+            LOG_INFO_STM(msg);
             break;
         case nvinfer1::ILogger::Severity::kVERBOSE:
-            LOG_DEBUG(msg);
+            LOG_DEBUG_STM(msg);
             break;
         default:
             LOG_ERROR_FMT("tensorrt log type error. msg[%s]", msg);

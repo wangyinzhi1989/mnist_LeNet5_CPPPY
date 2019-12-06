@@ -16,7 +16,7 @@ def to_uff(model_path, pb_model_file, uff_model_file):
     with tf.Graph().as_default() as g:
         # 定义输入占位
         #x = tf.placeholder(tf.float32, [None, forward.INPUT_NODE], name='x-input')
-        x = tf.compat.v1.placeholder(tf.float32, [1, forward.NUM_CHANNELS, forward.IMAGE_SZIE, forward.IMAGE_SZIE], name='x-input')
+        x = tf.compat.v1.placeholder(tf.float32, [32, forward.NUM_CHANNELS, forward.IMAGE_SZIE, forward.IMAGE_SZIE], name='x-input')
 
         # 因输入的是NCHW 需转成NHWC
         x_image = tf.transpose(x,[0,2,3,1])

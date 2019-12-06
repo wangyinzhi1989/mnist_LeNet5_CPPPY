@@ -72,7 +72,13 @@ std::string BaseRspCompose(bool res)
 std::string DiscernReqCompose(DiscernRsp& info)
 {
     Json::Value root;
-    root["number"] = info.number;
+    std::string labels;
+    std::for_each(info.label.begin(), info.label.end(), 
+        [&](int& i) {
+        labels += std::to_string(i); labels += ", "; });
+    labels.pop_back();
+    labels.pop_back();
+    root["number"] = labels;
     root["err_msg"] = info.err_msg;
     Json::StyledWriter swriter;
     return swriter.write(root);
