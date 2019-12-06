@@ -10,14 +10,15 @@
 *   -wangyingzhi 创建 2019/08/09
 */
 
+#include <cuda_runtime_api.h>
+#include <fstream>
+#include <opencv2/dnn/dnn.hpp>
 #include "TNLog.h"
 #include "engine.h"
 #include "NvUffParser.h"
 #include "logger.h"
 #include "define.h"
-#include <cuda_runtime_api.h>
-#include <fstream>
-#include <opencv2/dnn/dnn.hpp>
+#include "sysutils.h"
 
 using namespace nvuffparser;
 
@@ -68,6 +69,7 @@ CEngine::~CEngine()
         cudaFreeHost(output_buf_);
         output_buf_ = nullptr;
     }
+    cudaDeviceReset();
 }
 
 bool CEngine::Init(std::string& model)
@@ -81,6 +83,12 @@ bool CEngine::Init(std::string& model)
         return false;
     }
 
+    if (!file_exists(model))
+    {
+        LOG_WARN_FMT("engine file[%s] not exists.", model.c_str());
+        return true;
+    }
+
     IRuntime* runtime = createInferRuntime(CLogger::GetInstance());
     std::stringstream model_stream;
     std::ifstream file_stream(model, std::ios::ate);
@@ -90,6 +98,7 @@ bool CEngine::Init(std::string& model)
     file_stream.read(static_cast<char*>(model_mem), size);
     engine_ = runtime->deserializeCudaEngine(model_mem, size, nullptr);
     free(model_mem);
+    runtime->destroy();
     if (NULL == engine_)
     {
         LOG_ERROR_FMT("engine deserialize failed. file[%s]", model.c_str());
@@ -204,9 +213,9 @@ bool CEngine::LoadUffAndSave(std::string& uff_model)
     network->destroy();
     builder->destroy();
 
+    LOG_INFO("LoadUffAndSave success.");
     return true;
 }
-
 
 inline void readPGMFile(const std::string& fileName, uint8_t* buffer, int inH, int inW)
 {
@@ -272,15 +281,16 @@ bool CEngine::inference(std::vector<cv::Mat>& imgs, std::vector<int>& label)
 
     // 拷贝结果到内存
     //res = cudaMemcpy(output_buf_, input_gup_bufs_[1], batch_size*out_size_ * sizeof(float), cudaMemcpyDeviceToHost);
-    res = cudaMemcpyAsync(output_buf_, input_gup_bufs_[1], batch_size*out_size_ * sizeof(float), cudaMemcpyDeviceToHost, cuda_stream_);
+
+    // 同步等待gpu执行完成
+    res = cudaStreamSynchronize(cuda_stream_);
     if (cudaSuccess != res)
     {
         LOG_ERROR_FMT("out buf device to host failed. err[%d  %s]", res, cudaGetErrorString(res));
         return false;
     }
 
-    // 同步等待gpu执行完成
-    res = cudaStreamSynchronize(cuda_stream_);
+    res = cudaMemcpyAsync(output_buf_, input_gup_bufs_[1], batch_size*out_size_ * sizeof(float), cudaMemcpyDeviceToHost, cuda_stream_);
     if (cudaSuccess != res)
     {
         LOG_ERROR_FMT("out buf device to host failed. err[%d  %s]", res, cudaGetErrorString(res));

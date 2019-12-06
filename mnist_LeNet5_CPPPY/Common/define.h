@@ -19,10 +19,8 @@
 #include <string>
 #include <condition_variable>
 
-//! 退出互斥量声明
-extern std::mutex g_exit_mutex_;
-//! 退出条件变量声明
-extern std::condition_variable g_exit_cv_;
+//! 系统存活标志定义
+extern bool g_sysLive;
 
 //! 配置
 typedef struct _config 
@@ -37,7 +35,7 @@ typedef struct _config
     _config()
     {
         http_port = 9990;
-        model_path = "/home/wangyinzhi/TensorFlow/mnist/model/";
+        model_path = "/home/wangyinzhi/study/TensorFlow/mnist/model/";
         model_name = "model.ckpt";
         pb_model_file = "mnist_LeNet5_CPPPY.pb";
         uff_model_file = "mnist_LeNet5_CPPPY.uff";

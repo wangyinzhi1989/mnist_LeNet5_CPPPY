@@ -15,20 +15,33 @@
 #include "sysutils.h"
 #include "TNLog.h"
 
-//! 退出互斥量
-std::mutex g_exit_mutex_;
-//! 退出条件变量
-std::condition_variable g_exit_cv_;
+//! 系统存活标志定义
+bool g_sysLive = true;
 //! 配置
 Config g_config_;
 
 static void Wait()
 {
-    while (true)
+    while (g_sysLive)
     {
-        std::unique_lock<std::mutex> lock(g_exit_mutex_);
-        if (std::cv_status::no_timeout == g_exit_cv_.wait_for(lock, std::chrono::milliseconds(2000)))
-            return ;
+
+        char type = 'z';
+        int id = -1;
+
+        cin.sync();
+        cin.clear();
+        fflush(stdin);
+        cin >> type;
+        switch (type)
+        {
+        case 'Q':
+        case 'q':
+            g_sysLive = false;
+            LOG_INFO("Manual exit!");
+            break;
+        default:
+            break;
+        }
     }
 }
 

@@ -46,8 +46,8 @@ def evaluate(model_path_b):
     mnist = input_data.read_data_sets("/home/wangyinzhi/study/data/mnist/train", one_hot=True)
     with tf.Graph().as_default() as g:
         # 定义输入输出占位
-        x = tf.placeholder(tf.float32, [None, forward.INPUT_NODE], name='x-input')
-        y_ = tf.placeholder(tf.float32, [None, forward.OUTPUT_NODE], name='y-input')
+        x = tf.compat.v1.placeholder(tf.float32, [None, forward.INPUT_NODE], name='x-input')
+        y_ = tf.compat.v1.placeholder(tf.float32, [None, forward.OUTPUT_NODE], name='y-input')
         validate_feed = {x:mnist.validation.images, y_:mnist.validation.labels}
 
         x_image = tf.reshape(x,[mnist.validation.images.shape[0], forward.IMAGE_SZIE, forward.IMAGE_SZIE, forward.NUM_CHANNELS])
@@ -70,12 +70,12 @@ def evaluate(model_path_b):
         """
         var_averages = tf.train.ExponentialMovingAverage(train.MOVING_AVERAGE_DECAY)
         var_to_restore = var_averages.variables_to_restore()
-        saver = tf.train.Saver(var_to_restore)
+        saver = tf.compat.v1.train.Saver(var_to_restore)
 
         # 间隔EVAL_INTERVAL_SECS秒加载一次最新的模型，如果是最新的，则进行验证
         old_file = ""
         old_score = 0
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config = config) as sess:
             while 0 == EXIT_FLAG:

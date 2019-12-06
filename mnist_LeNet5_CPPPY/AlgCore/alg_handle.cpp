@@ -18,8 +18,8 @@
 
 CAlgHandle::CAlgHandle()
 {
-    wchar_t *b = L"/root/.pyenv/versions/anaconda3-5.1.0/lib/python3.6/lib-dynload:/root/.pyenv/versions/anaconda3-5.1.0/lib/python3.6:/root/.pyenv/versions/anaconda3-5.1.0/lib/python3.6/site-packages:/root/.pyenv/versions/anaconda3-5.1.0/lib";
-    //Py_SetPythonHome(b);
+    wchar_t *b = L"/root/.pyenv/versions/anaconda3-5.1.0/bin:/root/.pyenv/versions/anaconda3-5.1.0/lib/python3.6/lib-dynload:/root/.pyenv/versions/anaconda3-5.1.0/lib/python3.6:/root/.pyenv/versions/anaconda3-5.1.0/lib/python3.6/site-packages:/root/.pyenv/versions/anaconda3-5.1.0/lib";
+    Py_SetPythonHome(b);
     // python 环境初始化
     Py_Initialize();
 
@@ -130,11 +130,11 @@ bool CAlgHandle::PyFunLoad(std::string& exe_path)
     }
 
     LOG_INFO_FMT("exe path[%s]", exe_path.c_str());
-    std::string cmd = "sys.path.append('/home/wangyinzhi/study/TensorFlow/cmake-build/mnist_LeNet5_CPPPY/bin')";
+    std::string cmd = "sys.path.append('/home/wangyinzhi/study/TensorFlow/cmake-build/mnist_LeNet5_CPPPY/bin/')";
     PyRun_SimpleString("import sys");
     PyRun_SimpleString(cmd.c_str());
     PyRun_SimpleString("print(sys.path)");
-    PyRun_SimpleString("print(sys.version_info.major)");
+    PyRun_SimpleString("print(sys.version_info)");
 
     // 载入脚本
     static PyObject *train_model = PyImport_ImportModule("train");

@@ -21,6 +21,7 @@
 #include <arpa/inet.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #endif // WIN32
 
 string get_cur_date(const int fm /*=1*/)
@@ -298,6 +299,7 @@ bool file_exists(const string& file, int mode)
 {
     if (file.empty())
         return false;
+    return 0 == access(file.c_str(), mode);
 #ifdef WIN32
     return 0 == _access(file.c_str(), mode);
 #else

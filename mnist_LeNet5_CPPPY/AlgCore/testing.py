@@ -16,7 +16,7 @@ def to_uff(model_path, pb_model_file, uff_model_file):
     with tf.Graph().as_default() as g:
         # 定义输入占位
         #x = tf.placeholder(tf.float32, [None, forward.INPUT_NODE], name='x-input')
-        x = tf.placeholder(tf.float32, [1, forward.NUM_CHANNELS, forward.IMAGE_SZIE, forward.IMAGE_SZIE], name='x-input')
+        x = tf.compat.v1.placeholder(tf.float32, [1, forward.NUM_CHANNELS, forward.IMAGE_SZIE, forward.IMAGE_SZIE], name='x-input')
 
         # 因输入的是NCHW 需转成NHWC
         x_image = tf.transpose(x,[0,2,3,1])
@@ -31,11 +31,11 @@ def to_uff(model_path, pb_model_file, uff_model_file):
             映射到变量的本身，所以我们在获取变量的滑动平均值的时候只需要获取到变量
             的本身值而不需要去获取影子变量
         """
-        var_averages = tf.train.ExponentialMovingAverage(train.MOVING_AVERAGE_DECAY)
+        var_averages = tf.compat.v1.train.ExponentialMovingAverage(train.MOVING_AVERAGE_DECAY)
         var_to_restore = var_averages.variables_to_restore()
-        saver = tf.train.Saver(var_to_restore)
+        saver = tf.compat.v1.train.Saver(var_to_restore)
 
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             if model_path:
@@ -62,8 +62,8 @@ def testing(model_path_b, pb_model_file_b, uff_model_file_b):
 
     with tf.Graph().as_default() as g:
         # 定义输入输出占位
-        x = tf.placeholder(tf.float32, [None, forward.INPUT_NODE], name='x-input')
-        y_ = tf.placeholder(tf.float32, [None, forward.OUTPUT_NODE], name='y-input111')
+        x = tf.compat.v1.placeholder(tf.float32, [None, forward.INPUT_NODE], name='x-input')
+        y_ = tf.compat.v1.placeholder(tf.float32, [None, forward.OUTPUT_NODE], name='y-input111')
         test_feed = {x:mnist.test.images, y_:mnist.test.labels}
 
         x_image = tf.reshape(x,[mnist.test.images.shape[0], forward.IMAGE_SZIE, forward.IMAGE_SZIE, forward.NUM_CHANNELS])
@@ -80,12 +80,12 @@ def testing(model_path_b, pb_model_file_b, uff_model_file_b):
             映射到变量的本身，所以我们在获取变量的滑动平均值的时候只需要获取到变量
             的本身值而不需要去获取影子变量
         """
-        var_averages = tf.train.ExponentialMovingAverage(train.MOVING_AVERAGE_DECAY)
+        var_averages = tf.compat.v1.train.ExponentialMovingAverage(train.MOVING_AVERAGE_DECAY)
         var_to_restore = var_averages.variables_to_restore()
-        saver = tf.train.Saver(var_to_restore)
+        saver = tf.compat.v1.train.Saver(var_to_restore)
 
         forward.self_print("testing start")
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             if model_path:
