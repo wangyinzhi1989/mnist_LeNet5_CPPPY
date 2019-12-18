@@ -130,9 +130,13 @@ void CAlgHandle::Discern(DiscernReq& req, DiscernRsp& rsp)
 
     std::vector<cv::Mat> imgs;
     int i = 0;
+    size_t pos = 0;
+    std::string file_name;
     for (auto& it : files)
     {
-        LOG_INFO_FMT("idx[%d] img[%s]", i++, it.c_str());
+        pos = it.find_last_of('/');
+        file_name = it.substr(pos);
+        LOG_INFO_FMT("idx[%d] img[%s]", i++, file_name.c_str());
         cv::Mat img = cv::imread(it);
         imgs.emplace_back(img);
     }
